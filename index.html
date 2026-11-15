@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ranpraewshop - ขายแอคเคาท์เฟสบุ๊คเปล่า & แอพพรีเมี่ยม & เบอร์ OTP</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Kanit Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        purplePale: '#EBE4F3',
+                        purplePaleDark: '#D4C5E8',
+                        purpleAccent: '#9B7EDD',
+                        purpleDark: '#5E4394',
+                        chocoText: '#362D4A',
+                        grayPurple: '#7D7093',
+                        creamBg: '#F8F6FC',
+                    },
+                    fontFamily: {
+                        sans: ['Kanit', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Kanit', sans-serif; background-color: #F8F6FC; color: #362D4A; overflow-x: hidden; }
+
+        @keyframes spinSlow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .animate-spin-slow { animation: spinSlow 6s linear infinite; }
+
+        @keyframes floatSakura {
+            0% { transform: translateY(0px) rotate(0deg); opacity: 0.8; }
+            50% { transform: translateY(-10px) rotate(15deg); opacity: 1; }
+            100% { transform: translateY(0px) rotate(0deg); opacity: 0.8; }
+        }
+        .sakura-float { animation: floatSakura 4s ease-in-out infinite; }
+
+        .shop-card { border-radius: 2rem; border: 2px solid #D4C5E8; box-shadow: 0 8px 25px rgba(155, 126, 221, 0.15); background: #ffffff; transition: all 0.3s ease; }
+        .shop-card:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(94, 67, 148, 0.2); }
+    </style>
+</head>
+<body class="bg-creamBg text-chocoText min-h-screen flex flex-col">
+
+    <!-- Music Player Widget -->
+    <div class="fixed bottom-4 left-4 z-40 bg-white/95 backdrop-blur-md px-3 py-2 rounded-3xl shadow-lg border border-purplePaleDark flex items-center space-x-2">
+        <div class="w-8 h-8 rounded-full bg-purplePale flex items-center justify-center text-purpleDark animate-spin-slow">
+            <i class="fa-solid fa-music"></i>
+        </div>
+        <div class="text-xs">
+            <p class="font-bold text-chocoText">เพลงประกอบร้าน 🎶</p>
+            <p class="text-[10px] text-grayPurple" id="musicStatus">กดเล่นเพลง</p>
+        </div>
+        <button onclick="toggleMusic()" id="musicToggleBtn" class="bg-purpleAccent hover:bg-purpleDark text-white w-8 h-8 rounded-2xl flex items-center justify-center text-xs transition-all shadow-sm">
+            <i class="fa-solid fa-play" id="musicIcon"></i>
+        </button>
+    </div>
+
+    <div id="youtubePlayerContainer" style="display:none;"></div>
+
+    <!-- Navigation Bar -->
+    <nav class="bg-white/90 backdrop-blur-md sticky top-0 z-40 border-b-2 border-purplePaleDark shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="playCuteSound(); switchTab('shop')">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purpleAccent to-purplePale flex items-center justify-center text-white font-bold text-xl shadow-inner sakura-float">
+                        <i class="fa-solid fa-spa"></i>
+                    </div>
+                    <span class="font-bold text-xl bg-gradient-to-r from-purpleDark via-purpleAccent to-chocoText bg-clip-text text-transparent">Ranpraewshop</span>
+                </div>
+
+                <div class="hidden md:flex items-center space-x-2" id="navTabs">
+                    <button onclick="playCuteSound(); switchTab('shop')" class="nav-btn px-4 py-2 rounded-2xl text-sm font-semibold transition-all hover:bg-purplePale text-chocoText bg-purplePale/50" id="tab-shop">
+                        <i class="fa-solid fa-store mr-1 text-purpleAccent"></i> หน้าร้านค้า
+                    </button>
+                    <button onclick="playCuteSound(); switchTab('topup')" class="nav-btn px-4 py-2 rounded-2xl text-sm font-semibold transition-all hover:bg-purplePale text-chocoText" id="tab-topup">
+                        <i class="fa-solid fa-coins mr-1 text-purpleAccent"></i> เติมเครดิต
+                    </button>
+                    <button onclick="playCuteSound(); switchTab('orders')" class="nav-btn px-4 py-2 rounded-2xl text-sm font-semibold transition-all hover:bg-purplePale text-chocoText" id="tab-orders">
+                        <i class="fa-solid fa-receipt mr-1 text-grayPurple"></i> คำสั่งซื้อของฉัน
+                    </button>
+                    <button onclick="playCuteSound(); switchTab('account')" class="nav-btn px-4 py-2 rounded-2xl text-sm font-semibold transition-all hover:bg-purplePale text-chocoText" id="tab-account">
+                        <i class="fa-solid fa-wallet mr-1 text-grayPurple"></i> ช่องทางชำระเงิน
+                    </button>
+                    <button onclick="playCuteSound(); switchTab('rules')" class="nav-btn px-4 py-2 rounded-2xl text-sm font-semibold transition-all hover:bg-purplePale text-chocoText" id="tab-rules">
+                        <i class="fa-solid fa-book-open mr-1 text-purpleAccent"></i> กฎระเบียบ
+                    </button>
+                    <button onclick="playCuteSound(); checkAdminAccess()" class="nav-btn px-4 py-2 rounded-2xl text-sm font-semibold transition-all hover:bg-purplePale text-chocoText border border-grayPurple/40" id="tab-admin">
+                        <i class="fa-solid fa-user-shield mr-1 text-grayPurple"></i> ระบบแอดมิน
+                    </button>
+                </div>
+
+                <div class="flex items-center space-x-3">
+                    <div id="userProfile" class="hidden flex items-center space-x-2 bg-purplePale px-3 py-1.5 rounded-full border border-purplePaleDark">
+                        <i class="fa-solid fa-user-circle text-purpleDark text-xs"></i>
+                        <span id="userNameDisplay" class="text-xs font-semibold text-chocoText">User</span>
+                        <span class="text-xs text-chocoText font-bold bg-white px-2 py-0.5 rounded-full shadow-xs" id="userCreditDisplay">0 ฿</span>
+                        <button onclick="playCuteSound(); logout()" class="text-xs text-rose-400 hover:text-rose-600 font-bold pl-1" title="ออกจากระบบ"><i class="fa-solid fa-right-from-bracket"></i></button>
+                    </div>
+                    <button id="loginBtn" onclick="playCuteSound(); openAuthModal()" class="bg-gradient-to-r from-purpleAccent to-purplePaleDark hover:opacity-95 text-white font-medium px-4 py-2 rounded-2xl shadow-sm text-sm transition-all transform active:scale-95 border border-purplePaleDark">
+                        <i class="fa-solid fa-user mr-1"></i> เข้าสู่ระบบ
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="md:hidden flex justify-around bg-white border-t border-purplePaleDark py-2 px-1 text-[11px]">
+            <button onclick="playCuteSound(); switchTab('shop')" class="flex flex-col items-center text-chocoText font-medium"><i class="fa-solid fa-store text-base mb-0.5 text-purpleAccent"></i> หน้าร้าน</button>
+            <button onclick="playCuteSound(); switchTab('topup')" class="flex flex-col items-center text-chocoText font-medium"><i class="fa-solid fa-coins text-base mb-0.5 text-purpleAccent"></i> เติมเงิน</button>
+            <button onclick="playCuteSound(); switchTab('orders')" class="flex flex-col items-center text-chocoText font-medium"><i class="fa-solid fa-receipt text-base mb-0.5 text-grayPurple"></i> คำสั่งซื้อ</button>
+            <button onclick="playCuteSound(); switchTab('account')" class="flex flex-col items-center text-chocoText font-medium"><i class="fa-solid fa-wallet text-base mb-0.5 text-grayPurple"></i> บัญชี</button>
+            <button onclick="playCuteSound(); switchTab('rules')" class="flex flex-col items-center text-chocoText font-medium"><i class="fa-solid fa-book-open text-base mb-0.5 text-purpleAccent"></i> กฎร้าน</button>
+            <button onclick="playCuteSound(); checkAdminAccess()" class="flex flex-col items-center text-chocoText font-medium"><i class="fa-solid fa-user-shield text-base mb-0.5 text-grayPurple"></i> แอดมิน</button>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full">
+
+        <div class="bg-gradient-to-r from-purplePale via-white to-purplePale/60 p-4 rounded-3xl shadow-sm mb-6 flex items-center justify-between border border-purplePaleDark relative overflow-hidden">
+            <div class="absolute -right-4 -bottom-4 text-purplePaleDark/30 text-7xl pointer-events-none"><i class="fa-solid fa-spa"></i></div>
+            <div class="flex items-center space-x-3 relative z-10">
+                <div class="bg-white p-3 rounded-2xl text-purpleAccent shadow-sm text-xl"><i class="fa-solid fa-shield-halved"></i></div>
+                <div>
+                    <h2 class="font-bold text-chocoText text-sm sm:text-base">🌸 ยินดีต้อนรับสู่ Ranpraewshop จำหน่ายแอคเฟสบุ๊คเปล่า & แอพพรีเมี่ยม & เบอร์ OTP</h2>
+                    <p class="text-xs text-grayPurple">บริการรหัสสินค้าอัตโนมัติ รวดเร็ว ปลอดภัย 24 ชั่วโมง</p>
+                </div>
+            </div>
+            <button onclick="playCuteSound(); fetchDataFromSheet(true)" class="bg-white hover:bg-purplePale text-xs font-semibold px-3 py-2 rounded-2xl text-chocoText shadow-sm border border-purplePaleDark transition-all flex items-center space-x-1 whitespace-nowrap relative z-10">
+                <i class="fa-solid fa-arrows-rotate text-purpleAccent"></i>
+                <span class="hidden sm:inline">อัปเดตสต๊อกล่าสุด</span>
+            </button>
+        </div>
+
+        <!-- 1. Shop Page -->
+        <section id="page-shop" class="tab-content">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold text-chocoText flex items-center"><span class="w-3 h-3 bg-purpleAccent rounded-full mr-2"></span> สินค้าและบริการทั้งหมด</h2>
+                <span id="productCount" class="text-xs bg-purplePale px-3 py-1 rounded-full text-chocoText font-medium">มีทั้งหมด 0 รายการ</span>
+            </div>
+            <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </section>
+
+        <!-- Top-up Page -->
+        <section id="page-topup" class="tab-content hidden">
+            <div class="max-w-xl mx-auto shop-card p-6 space-y-6">
+                <div class="flex items-center space-x-3 border-b border-purplePale pb-3">
+                    <i class="fa-solid fa-coins text-2xl text-purpleAccent"></i>
+                    <div>
+                        <h2 class="text-xl font-bold text-chocoText">เติมเครดิตเข้าระบบอัตโนมัติ</h2>
+                        <p class="text-xs text-grayPurple">สแกน QR Code เพื่อโอนเงิน จากนั้นอัปโหลดสลิปจากเครื่อง เครดิตเข้าทันที</p>
+                    </div>
+                </div>
+
+                <div class="bg-purplePale/40 p-5 rounded-3xl border border-purplePaleDark text-center space-y-3 shadow-inner">
+                    <h3 class="font-bold text-sm text-chocoText"><i class="fa-solid fa-qrcode mr-1 text-purpleAccent"></i> สแกน QR Code เพื่อชำระเงิน</h3>
+                    <div id="topupImgContainer" class="block">
+                        <img id="topupImgDisplay" src="https://i.ibb.co/cXDCXGJ5/IMG-2351.jpg" class="max-w-[220px] h-auto rounded-2xl mx-auto shadow-md border-2 border-purplePaleDark mb-2 cursor-pointer hover:scale-105 transition-all" onclick="openImageViewer(this.src)" alt="QR Code ชำระเงิน">
+                    </div>
+                    <p class="text-xs font-semibold text-chocoText" id="topupBankInfo">ธนาคารกสิกรไทย (ชรินพัชร เพชรสวน)</p>
+                    <p class="text-base font-mono font-bold text-chocoText" id="topupNumberInfo">123-4-56789-0</p>
+                    <p class="text-xs text-grayPurple font-semibold">TrueMoney Wallet: <span id="topupWalletDisplay" class="font-mono">0989828417</span></p>
+                    
+                    <div class="flex flex-wrap justify-center gap-2 pt-1">
+                        <button onclick="copyText('topupNumberInfo', 'เลขบัญชีร้าน')" class="bg-purpleAccent hover:opacity-90 text-white text-xs font-bold px-3.5 py-2 rounded-2xl shadow-sm transition-all">
+                            <i class="fa-solid fa-copy mr-1"></i> คัดลอกเลขบัญชี
+                        </button>
+                        <button onclick="copyCustomText('0989828417', 'True Wallet')" class="bg-purpleDark hover:opacity-90 text-white text-xs font-bold px-3.5 py-2 rounded-2xl shadow-sm transition-all">
+                            <i class="fa-solid fa-wallet mr-1"></i> คัดลอก Wallet
+                        </button>
+                        <button onclick="copyCustomText('ซื้อขายกับRanpraewshop', 'โน๊ตสลิป')" class="bg-purplePaleDark hover:opacity-90 text-chocoText text-xs font-bold px-3.5 py-2 rounded-2xl shadow-sm transition-all">
+                            <i class="fa-solid fa-note-sticky mr-1"></i> คัดลอกโน๊ตสลิป
+                        </button>
+                    </div>
+                </div>
+
+                <form onsubmit="handleTopupSubmit(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-chocoText mb-1">จำนวนเงินที่โอน (บาท)</label>
+                        <input type="number" id="topupAmount" required min="1" placeholder="เช่น 50" class="w-full px-3.5 py-2.5 rounded-2xl border border-purplePaleDark text-sm focus:outline-none focus:ring-2 focus:ring-purpleAccent bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-chocoText mb-1">อัปโหลดรูปสลิปโอนเงิน (จากเครื่อง)</label>
+                        <input type="file" id="topupSlipFile" accept="image/*" required class="w-full px-3 py-2 rounded-2xl border border-purplePaleDark text-sm bg-white file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-purpleAccent file:text-white hover:file:opacity-90">
+                        <p class="text-[11px] text-grayPurple mt-1">ระบบจะตรวจสอบสลิปและเติมเครดิตให้อัตโนมัติ</p>
+                    </div>
+                    <button type="submit" class="w-full bg-gradient-to-r from-purpleAccent to-purpleDark text-white font-bold py-3 rounded-2xl text-sm shadow-md hover:opacity-95 transition-all">
+                        <i class="fa-solid fa-paper-plane mr-1"></i> ตรวจสอบสลิปและเติมเครดิตทันที
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- 2. Orders History Page -->
+        <section id="page-orders" class="tab-content hidden">
+            <div class="shop-card p-4 sm:p-6">
+                <h2 class="text-xl font-bold text-chocoText mb-4 flex items-center"><i class="fa-solid fa-box-open text-purpleAccent mr-2"></i> คำสั่งซื้อของฉัน (รับรหัสสินค้า)</h2>
+                <div class="space-y-4" id="ordersListContainer"></div>
+            </div>
+        </section>
+
+        <!-- 3. Account / Payment Page -->
+        <section id="page-account" class="tab-content hidden">
+            <div class="max-w-2xl mx-auto shop-card p-6 space-y-6">
+                <div class="flex items-center space-x-3 mb-2 border-b border-purplePale pb-3">
+                    <i class="fa-solid fa-wallet text-2xl text-grayPurple"></i>
+                    <h2 class="text-xl font-bold text-chocoText">ช่องทางการชำระเงิน / บัญชีร้าน</h2>
+                </div>
+                
+                <div id="accImgContainer" class="text-center">
+                    <img id="accImgDisplay" src="https://i.ibb.co/cXDCXGJ5/IMG-2351.jpg" class="max-w-[220px] h-auto rounded-3xl mx-auto shadow-sm border-2 border-purplePaleDark cursor-pointer" onclick="openImageViewer(this.src)" title="คลิกเพื่อดูรูปขนาดใหญ่">
+                    <p class="text-[11px] text-grayPurple mt-1">คลิกที่รูปเพื่อขยายใหญ่</p>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4">
+                    <div class="bg-purplePale/40 p-4 rounded-3xl border border-purplePaleDark flex items-center justify-between">
+                        <div>
+                            <p class="text-xs text-grayPurple font-semibold mb-0.5">ธนาคาร / ชื่อบัญชี</p>
+                            <p class="text-sm font-bold text-chocoText" id="displayAccBank">ธนาคารกสิกรไทย</p>
+                            <p class="text-xs font-mono text-grayPurple" id="displayAccName">ชรินพัชร เพชรสวน</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-purplePale/40 p-4 rounded-3xl border border-purplePaleDark flex items-center justify-between">
+                        <div>
+                            <p class="text-xs text-grayPurple font-semibold mb-0.5">เลขบัญชีธนาคาร</p>
+                            <p class="text-base font-mono font-bold text-chocoText" id="displayAccNumber">123-4-56789-0</p>
+                        </div>
+                        <button onclick="copyText('displayAccNumber', 'เลขบัญชี')" class="bg-purpleAccent hover:opacity-90 text-white text-xs font-bold px-4 py-2 rounded-2xl shadow-sm transition-all">
+                            <i class="fa-solid fa-copy mr-1"></i> คัดลอก
+                        </button>
+                    </div>
+
+                    <div class="bg-purplePale/60 p-4 rounded-3xl border border-purplePaleDark flex items-center justify-between">
+                        <div>
+                            <p class="text-xs text-grayPurple font-semibold mb-0.5">TrueMoney Wallet</p>
+                            <p class="text-base font-mono font-bold text-chocoText" id="displayAccWallet">0989828417</p>
+                        </div>
+                        <button onclick="copyCustomText('0989828417', 'TrueMoney Wallet')" class="bg-purpleDark hover:opacity-90 text-white text-xs font-bold px-4 py-2 rounded-2xl shadow-sm transition-all">
+                            <i class="fa-solid fa-copy mr-1"></i> คัดลอก
+                        </button>
+                    </div>
+
+                    <div class="bg-purplePale p-4 rounded-3xl border border-purplePaleDark flex items-center justify-between">
+                        <div>
+                            <p class="text-xs text-grayPurple font-semibold mb-0.5">โน๊ตสลิปโอนเงิน</p>
+                            <p class="text-base font-mono font-bold text-chocoText" id="displayNoteSlip">ซื้อขายกับRanpraewshop</p>
+                        </div>
+                        <button onclick="copyCustomText('ซื้อขายกับRanpraewshop', 'โน๊ตสลิป')" class="bg-purpleAccent hover:opacity-90 text-white text-xs font-bold px-4 py-2 rounded-2xl shadow-sm transition-all">
+                            <i class="fa-solid fa-copy mr-1"></i> คัดลอกโน๊ตสลิป
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. Shop Rules Page -->
+        <section id="page-rules" class="tab-content hidden">
+            <div class="max-w-2xl mx-auto shop-card p-6 space-y-4">
+                <div class="flex items-center space-x-3 mb-2 border-b border-purplePale pb-3">
+                    <i class="fa-solid fa-shield-halved text-2xl text-purpleAccent"></i>
+                    <h2 class="text-xl font-bold text-chocoText">กฎและข้อตกลงของ Ranpraewshop</h2>
+                </div>
+                <div id="rulesImgContainer" class="mb-4 text-center hidden">
+                    <img id="rulesImgDisplay" src="" class="max-w-full h-auto rounded-3xl mx-auto shadow-sm border border-purplePaleDark cursor-pointer" onclick="openImageViewer(this.src)" title="คลิกเพื่อขยายรูป">
+                    <p class="text-[11px] text-grayPurple mt-1">คลิกที่รูปเพื่อขยายใหญ่</p>
+                </div>
+                <div class="space-y-3 text-sm text-grayPurple whitespace-pre-line" id="shopRulesContent"></div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+                    <div class="bg-purplePale p-4 rounded-3xl border border-purplePaleDark flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-emerald-500 text-white rounded-2xl flex items-center justify-center text-lg shadow-sm"><i class="fa-brands fa-line"></i></div>
+                            <div>
+                                <p class="text-xs text-emerald-700 font-semibold">LINE ร้าน</p>
+                                <a href="https://line.me/R/ti/p/@803zqcdl" target="_blank" class="text-sm font-mono font-bold text-emerald-900 underline">@803zqcdl</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-purplePale/80 p-4 rounded-3xl border border-purplePaleDark flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-blue-600 text-white rounded-2xl flex items-center justify-center text-lg shadow-sm"><i class="fa-brands fa-facebook"></i></div>
+                            <div>
+                                <p class="text-xs text-blue-700 font-semibold">Facebook (praewwarin nio)</p>
+                                <a href="https://www.facebook.com/share/14z3AWEY5nH/" target="_blank" class="text-sm font-mono font-bold text-blue-900 underline">คลิกเปิด Facebook</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. Admin Panel Page -->
+        <section id="page-admin" class="tab-content hidden">
+            <div class="shop-card p-6 border-purplePaleDark">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 pb-4 border-b border-purplePale gap-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-chocoText flex items-center"><i class="fa-solid fa-sliders text-purpleAccent mr-2"></i> ระบบจัดการหลังบ้าน Ranpraewshop</h2>
+                        <p class="text-xs text-grayPurple">จัดการสต๊อกสินค้าและตรวจสอบยอดเติมเงินอัตโนมัติ</p>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button onclick="playCuteSound(); fetchDataFromSheet(true)" class="bg-purplePale hover:bg-purplePaleDark text-chocoText text-xs font-bold px-3 py-2 rounded-2xl transition-all">
+                            <i class="fa-solid fa-arrows-rotate mr-1"></i> รีเฟรชข้อมูลล่าสุด
+                        </button>
+                        <button onclick="playCuteSound(); adminLogout()" class="bg-rose-100 hover:bg-rose-200 text-rose-600 text-xs font-bold px-3 py-2 rounded-2xl transition-all">
+                            <i class="fa-solid fa-arrow-right-from-bracket mr-1"></i> ออกจากแอดมิน
+                        </button>
+                    </div>
+                </div>
+
+                <div class="space-y-8">
+                    <!-- Sales Report Panel -->
+                    <div class="bg-gradient-to-r from-purplePale to-white p-5 rounded-3xl border border-purplePaleDark shadow-sm">
+                        <h3 class="font-bold text-sm text-chocoText mb-3 flex items-center">
+                            <i class="fa-solid fa-chart-line text-purpleAccent mr-2"></i> สรุปยอดขาย (Sales Summary)
+                        </h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div class="bg-white p-4 rounded-2xl border border-purplePaleDark shadow-xs">
+                                <p class="text-xs text-grayPurple font-semibold">ยอดขายรวมทั้งหมด</p>
+                                <p class="text-xl font-bold text-purpleAccent mt-1" id="adminTotalSalesAmount">0 ฿</p>
+                            </div>
+                            <div class="bg-white p-4 rounded-2xl border border-purplePaleDark shadow-xs">
+                                <p class="text-xs text-grayPurple font-semibold">ออเดอร์ที่สำเร็จ</p>
+                                <p class="text-xl font-bold text-grayPurple mt-1" id="adminTotalSalesCount">0 รายการ</p>
+                            </div>
+                            <div class="bg-white p-4 rounded-2xl border border-purplePaleDark shadow-xs">
+                                <p class="text-xs text-grayPurple font-semibold">สินค้าคงเหลือรวม</p>
+                                <p class="text-xl font-bold text-emerald-600 mt-1" id="adminTotalStockCount">0 ชิ้น</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Topups Log Table -->
+                    <div class="bg-purplePale/30 p-5 rounded-3xl border border-purplePaleDark">
+                        <h3 class="font-bold text-sm text-chocoText mb-3"><i class="fa-solid fa-coins mr-1"></i> ประวัติลูกค้าเติมเครดิตอัตโนมัติ (Topups)</h3>
+                        <div class="overflow-x-auto max-h-60 overflow-y-auto">
+                            <table class="w-full text-left text-xs text-chocoText bg-white rounded-2xl">
+                                <thead class="bg-purplePale font-semibold sticky top-0">
+                                    <tr><th class="p-2.5">รหัส Topup</th><th class="p-2.5">ผู้ใช้</th><th class="p-2.5">จำนวนเงิน</th><th class="p-2.5">สลิป</th><th class="p-2.5">วันที่</th><th class="p-2.5">สถานะ</th></tr>
+                                </thead>
+                                <tbody id="adminTopupsTableBody" class="divide-y divide-purplePale"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Add Product Form -->
+                    <form id="productForm" onsubmit="handleAddProduct(event)" class="bg-purplePale/30 p-5 rounded-3xl border border-purplePaleDark">
+                        <h3 class="font-bold text-sm text-chocoText mb-3"><i class="fa-solid fa-box mr-1"></i> เพิ่มสินค้าใหม่ หรือเติมสต๊อก</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-semibold text-chocoText mb-1">เลือกสินค้าที่มีอยู่แล้ว (เพื่อเติมสต๊อก)</label>
+                                <select id="selectExistingProduct" onchange="onSelectExistingProduct()" class="w-full px-3 py-2 rounded-2xl border border-purplePaleDark text-sm focus:outline-none focus:ring-2 focus:ring-purpleAccent bg-white">
+                                    <option value="">-- สร้างสินค้าใหม่ --</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-chocoText mb-1">ชื่อสินค้า / บริการ (Name)</label>
+                                <input type="text" id="pName" required placeholder="เช่น แอคเคาท์เฟสบุ๊คเปล่า / แอพพรีเมี่ยม / เบอร์ OTP" class="w-full px-3 py-2 rounded-2xl border border-purplePaleDark text-sm bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-chocoText mb-1">ราคาต่อชิ้น (Price)</label>
+                                <input type="number" id="pPrice" required min="0" placeholder="50" class="w-full px-3 py-2 rounded-2xl border border-purplePaleDark text-sm bg-white">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-semibold text-chocoText mb-1">ลิงก์รูปภาพสินค้า (Image URL)</label>
+                                <input type="text" id="pImgUrl" placeholder="https://..." class="w-full px-3 py-2 rounded-2xl border border-purplePaleDark text-sm bg-white">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-semibold text-chocoText mb-1">รายละเอียดสินค้า (Desc)</label>
+                                <textarea id="pDesc" rows="2" placeholder="รายละเอียดบัญชี/แอพพรีเมี่ยม/เบอร์ OTP..." class="w-full px-3 py-2 rounded-2xl border border-purplePaleDark text-sm bg-white"></textarea>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-semibold text-chocoText mb-1">รหัส / บัญชีสินค้า (6 บรรทัดต่อชุด คั่นด้วย `---` หรือเว้นบรรทัด)</label>
+                                <textarea id="pCodes" rows="6" placeholder="Name&#10;Mail&#10;Passmail&#10;Passacc&#10;2FA&#10;Link&#10;---" class="w-full px-3 py-2 rounded-2xl border border-purplePaleDark text-xs font-mono bg-white"></textarea>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex justify-between items-center">
+                            <button type="button" onclick="playCuteSound(); resetProductForm()" class="text-xs text-grayPurple underline">ล้างฟอร์ม</button>
+                            <button type="submit" class="bg-purpleAccent text-white font-semibold px-5 py-2 rounded-2xl text-sm shadow-sm hover:opacity-90">บันทึก / เติมสต๊อก</button>
+                        </div>
+                    </form>
+
+                    <!-- Product Table -->
+                    <div>
+                        <h3 class="font-bold text-sm text-chocoText mb-3">รายการสินค้าปัจจุบัน (Products)</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs text-chocoText">
+                                <thead class="bg-purplePale text-chocoText font-semibold rounded-2xl">
+                                    <tr><th class="p-2.5">ภาพ</th><th class="p-2.5">ชื่อสินค้า</th><th class="p-2.5">ราคา</th><th class="p-2.5">สต๊อก</th><th class="p-2.5">จัดการ</th></tr>
+                                </thead>
+                                <tbody id="adminProductTableBody" class="divide-y divide-purplePale"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Sales History Table -->
+                    <div class="bg-purplePale/30 p-5 rounded-3xl border border-purplePaleDark">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="font-bold text-sm text-chocoText"><i class="fa-solid fa-clock-rotate-left mr-1"></i> ประวัติการขายทั้งหมด (Sales)</h3>
+                            <span id="adminTotalSalesBadge" class="text-xs bg-purplePale text-chocoText font-bold px-2.5 py-0.5 rounded-full">0 รายการ</span>
+                        </div>
+                        <div class="overflow-x-auto max-h-96 overflow-y-auto">
+                            <table class="w-full text-left text-xs text-chocoText">
+                                <thead class="bg-purplePale text-chocoText font-semibold sticky top-0">
+                                    <tr><th class="p-2.5">ID</th><th class="p-2.5">ผู้ใช้</th><th class="p-2.5">ชื่อสินค้า</th><th class="p-2.5">ราคา</th><th class="p-2.5">รหัสที่ขาย</th><th class="p-2.5">วันที่</th></tr>
+                                </thead>
+                                <tbody id="adminSalesTableBody" class="divide-y divide-purplePale bg-white"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Account Setting -->
+                    <div class="bg-purplePale/40 p-5 rounded-3xl border border-purplePaleDark space-y-3">
+                        <h3 class="font-bold text-sm text-chocoText"><i class="fa-solid fa-wallet mr-1"></i> ตั้งค่าข้อมูลบัญชี / ช่องทางชำระเงิน (Settings)</h3>
+                        <div>
+                            <label class="block text-xs font-semibold text-chocoText mb-1">ลิงก์รูปป้ายบัญชี / QR Code (AccImgUrl)</label>
+                            <input type="text" id="setAccImgUrl" value="https://i.ibb.co/cXDCXGJ5/IMG-2351.jpg" placeholder="https://..." class="w-full px-3 py-2 rounded-2xl border border-purplePaleDark text-xs bg-white">
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-chocoText mb-1">ชื่อธนาคาร / ช่องทาง (AccBank)</label>
+                                <input type="text" id="setAccBank" value="ธนาคารกสิกรไทย" class="w-full px-3 py-2 rounded-2xl border border-purplePaleDark text-xs bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-chocoText mb-1">ชื่อบัญชี (AccName)</label>
+                                <input type="text" id="setAccName" value="ชรินพัชร เพชรสวน" class="w-full px-3 py-2 rounded-2xl border border-purplePaleDark text-xs bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-chocoText mb-1">เลขบัญชีธนาคาร (AccNumber)</label>
+                                <input type="text" id="setAccNumber" value="123-4-56789-0" class="w-full px-3 py-2 rounded-2xl border border-purplePaleDark text-xs bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-chocoText mb-1">TrueMoney Wallet (AccWallet)</label>
+                                <input type="text" id="setAccWallet" value="0989828417" class="w-full px-3 py-2 rounded-2xl border border-purplePaleDark text-xs font-mono bg-white">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-semibold text-chocoText mb-1">โน๊ตสลิป (NoteSlip)</label>
+                                <input type="text" id="setNoteSlip" value="ซื้อขายกับRanpraewshop" class="w-full px-3 py-2 rounded-2xl border border-purplePaleDark text-xs font-mono bg-white">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Rule & Image Setting -->
+                    <div class="bg-purplePale/40 p-5 rounded-3xl border border-purplePaleDark space-y-3">
+                        <h3 class="font-bold text-sm text-chocoText"><i class="fa-solid fa-image mr-1"></i> ตั้งค่ากฎร้านและป้ายกฎ (Rules)</h3>
+                        <div>
+                            <label class="block text-xs font-semibold text-chocoText mb-1">ลิงก์รูปป้ายกฎระเบียบ (RulesImgUrl)</label>
+                            <input type="text" id="rulesImgUrlInput" placeholder="https://..." class="w-full px-3 py-2 rounded-2xl border border-purplePaleDark text-xs bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-chocoText mb-1">ข้อความกฎระเบียบ (Rules)</label>
+                            <textarea id="setRulesText" rows="3" class="w-full px-3 py-2 rounded-2xl border border-purplePaleDark text-xs bg-white"></textarea>
+                        </div>
+                        <button onclick="playCuteSound(); saveShopSettings()" class="bg-purpleAccent hover:opacity-90 text-white font-semibold px-4 py-2 rounded-2xl text-xs transition-all">
+                            บันทึกข้อมูลตั้งค่าทั้งหมด
+                        </button>
+                    </div>
+
+                    <!-- Sync Button -->
+                    <div class="pt-4 border-t border-purplePale flex justify-end">
+                        <button onclick="playCuteSound(); saveAllDataToSheet()" class="w-full sm:w-auto bg-gradient-to-r from-purpleAccent to-purpleDark text-white font-bold px-6 py-3 rounded-2xl shadow-md text-sm hover:opacity-95 transition-all flex items-center justify-center">
+                            <i class="fa-solid fa-cloud-arrow-up mr-2"></i> บันทึกข้อมูลสินค้าลง Google Sheet
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Image Viewer Modal -->
+    <div id="imageViewerModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4" onclick="closeImageViewer()">
+        <div class="relative max-w-4xl max-h-[90vh]">
+            <button onclick="closeImageViewer()" class="absolute -top-10 right-0 text-white text-2xl font-bold bg-gray-800/60 w-8 h-8 rounded-full flex items-center justify-center hover:bg-rose-500 transition-all">&times;</button>
+            <img id="viewerImageElement" src="" class="max-w-full max-h-[85vh] rounded-3xl shadow-2xl mx-auto object-contain">
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="authModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="shop-card p-6 w-full max-w-sm">
+            <div class="text-center mb-6">
+                <div class="w-12 h-12 bg-purplePale rounded-2xl flex items-center justify-center mx-auto mb-2 text-purpleAccent text-xl font-bold"><i class="fa-solid fa-user-circle"></i></div>
+                <h3 class="text-lg font-bold text-chocoText">เข้าสู่ระบบ Ranpraewshop</h3>
+            </div>
+            <form onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-chocoText mb-1">ชื่อผู้ใช้งาน (Username)</label>
+                    <input type="text" id="loginUsername" required placeholder="กรอกชื่อผู้ใช้" class="w-full px-3.5 py-2.5 rounded-2xl border border-purplePaleDark text-sm bg-white">
+                </div>
+                <button type="submit" class="w-full bg-purpleAccent text-white font-bold py-2.5 rounded-2xl text-sm shadow-sm hover:opacity-90">เข้าสู่ระบบ</button>
+            </form>
+            <div class="mt-4 text-center"><button onclick="closeAuthModal()" class="text-xs text-grayPurple">ยกเลิก</button></div>
+        </div>
+    </div>
+
+    <div id="adminAuthModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="shop-card p-6 w-full max-w-sm">
+            <div class="text-center mb-6">
+                <div class="w-12 h-12 bg-purplePale rounded-2xl flex items-center justify-center mx-auto mb-2 text-grayPurple text-xl font-bold"><i class="fa-solid fa-user-shield"></i></div>
+                <h3 class="text-lg font-bold text-chocoText">เข้าสู่ระบบแอดมิน</h3>
+            </div>
+            <form onsubmit="handleAdminLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-chocoText mb-1">รหัสผ่านแอดมิน</label>
+                    <input type="password" id="adminPass" required placeholder="รหัสผ่าน" class="w-full px-3.5 py-2.5 rounded-2xl border border-purplePaleDark text-sm bg-white">
+                </div>
+                <button type="submit" class="w-full bg-grayPurple text-white font-bold py-2.5 rounded-2xl text-sm shadow-md hover:opacity-90">เข้าสู่ระบบ</button>
+            </form>
+            <div class="mt-4 text-center"><button onclick="closeAdminModal()" class="text-xs text-grayPurple">ยกเลิก</button></div>
+        </div>
+    </div>
+
+    <script>
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwrDhRSetyO3Sqre6l5qZeItQrLcbeWTom7kI3p2fSXKDL3lFtWSnXadQRpMYOvIYh6/exec";
+        const ADMIN_PASSWORD = "admin";
+
+        let currentUser = null;
+        let isAdminLoggedIn = false;
+        let isMusicPlaying = false;
+
+        let products = [];
+        let orders = [];
+        let sales = [];
+        let topups = [];
+        let usersCredit = {};
+        let shopSettings = {
+            rules: "1. แอคเคาท์เฟสบุ๊คเปล่า และแอพพรีเมี่ยม มีประกันตามเงื่อนไขร้าน\n2. จัดส่งข้อมูลรหัสอัตโนมัติทันทีหลังชำระเงิน",
+            rulesImgUrl: "",
+            accImgUrl: "https://i.ibb.co/cXDCXGJ5/IMG-2351.jpg",
+            accName: "ชรินพัชร เพชรสวน",
+            accNumber: "123-4-56789-0",
+            accBank: "ธนาคารกสิกรไทย",
+            accWallet: "0989828417",
+            noteSlip: "ซื้อขายกับRanpraewshop"
+        };
+
+        let productQuantities = {};
+
+        function openImageViewer(imgSrc) {
+            playCuteSound();
+            if (!imgSrc) return;
+            document.getElementById('viewerImageElement').src = imgSrc;
+            document.getElementById('imageViewerModal').classList.remove('hidden');
+        }
+
+        function closeImageViewer() {
+            document.getElementById('imageViewerModal').classList.add('hidden');
+        }
+
+        function toggleMusic() {
+            playCuteSound();
+            const container = document.getElementById('youtubePlayerContainer');
+            const icon = document.getElementById('musicIcon');
+            const status = document.getElementById('musicStatus');
+            
+            if (!isMusicPlaying) {
+                container.innerHTML = `<iframe width="200" height="200" src="https://www.youtube.com/embed/dmepKfmk7ms?autoplay=1&loop=1&playlist=dmepKfmk7ms" frameborder="0" allow="autoplay"></iframe>`;
+                icon.className = "fa-solid fa-pause";
+                status.innerText = "กำลังเล่นเพลง 🎶";
+                isMusicPlaying = true;
+            } else {
+                container.innerHTML = "";
+                icon.className = "fa-solid fa-play";
+                status.innerText = "หยุดเล่นเพลง";
+                isMusicPlaying = false;
+            }
+        }
+
+        function playCuteSound() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.08);
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.08);
+            } catch (e) {}
+        }
+
+        function copyText(elementId, label) {
+            playCuteSound();
+            const text = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                Swal.fire({ icon: 'success', title: 'คัดลอกสำเร็จ!', text: `คัดลอก ${label} เรียบร้อยแล้ว`, timer: 1500, showConfirmButton: false });
+            });
+        }
+
+        function copyCustomText(textToCopy, label) {
+            playCuteSound();
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                Swal.fire({ icon: 'success', title: 'คัดลอกสำเร็จ!', text: `คัดลอก ${label} เรียบร้อยแล้ว`, timer: 1500, showConfirmButton: false });
+            });
+        }
+
+        window.onload = function() {
+            fetchDataFromSheet(false);
+        };
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('bg-purplePale/50', 'text-chocoText'));
+            
+            const targetPage = document.getElementById(`page-${tabId}`);
+            if (targetPage) targetPage.classList.remove('hidden');
+            const targetTab = document.getElementById(`tab-${tabId}`);
+            if (targetTab) targetTab.classList.add('bg-purplePale/50', 'text-chocoText');
+        }
+
+        function checkAdminAccess() {
+            if (isAdminLoggedIn) switchTab('admin');
+            else openAdminModal();
+        }
+
+        function openAdminModal() { document.getElementById('adminAuthModal').classList.remove('hidden'); }
+        function closeAdminModal() { document.getElementById('adminAuthModal').classList.add('hidden'); }
+
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            playCuteSound();
+            if (document.getElementById('adminPass').value === ADMIN_PASSWORD) {
+                isAdminLoggedIn = true;
+                closeAdminModal();
+                switchTab('admin');
+                renderAdminView();
+            } else {
+                Swal.fire('ข้อผิดพลาด', 'รหัสผ่านไม่ถูกต้อง', 'error');
+            }
+        }
+
+        function adminLogout() { isAdminLoggedIn = false; switchTab('shop'); }
+        function openAuthModal() { document.getElementById('authModal').classList.remove('hidden'); }
+        function closeAuthModal() { document.getElementById('authModal').classList.add('hidden'); }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            playCuteSound();
+            const username = document.getElementById('loginUsername').value.trim();
+            if (!username) return;
+            
+            let userCredit = usersCredit[username] || 0;
+            currentUser = { username: username, credit: userCredit };
+            
+            closeAuthModal();
+            updateUserUI();
+            renderOrders();
+        }
+
+        function logout() { currentUser = null; updateUserUI(); switchTab('shop'); }
+
+        function updateUserUI() {
+            const userProfile = document.getElementById('userProfile');
+            const loginBtn = document.getElementById('loginBtn');
+            if (currentUser) {
+                userProfile.classList.remove('hidden');
+                loginBtn.classList.add('hidden');
+                document.getElementById('userNameDisplay').innerText = currentUser.username;
+                document.getElementById('userCreditDisplay').innerText = (currentUser.credit || 0) + ' ฿';
+            } else {
+                userProfile.classList.add('hidden');
+                loginBtn.classList.remove('hidden');
+            }
+        }
+
+        function handleTopupSubmit(e) {
+            e.preventDefault();
+            if (!currentUser) { openAuthModal(); return; }
+            playCuteSound();
+            
+            const amount = parseFloat(document.getElementById('topupAmount').value);
+            const fileInput = document.getElementById('topupSlipFile');
+
+            if (fileInput.files.length === 0) {
+                Swal.fire('แจ้งเตือน', 'กรุณาเลือกรูปสลิปโอนเงิน', 'warning');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            Swal.fire({ title: 'กำลังตรวจสอบสลิปและเติมเงิน...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+
+            const reader = new FileReader();
+            reader.onload = function(uploadEvent) {
+                const base64Data = uploadEvent.target.result;
+
+                fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({
+                        action: 'uploadAndTopup',
+                        username: currentUser.username,
+                        amount: amount,
+                        base64Data: base64Data,
+                        filename: file.name
+                    })
+                })
+                .then(res => res.json())
+                .then(topupRes => {
+                    if (topupRes.status === 'success') {
+                        currentUser.credit = topupRes.credit;
+                        usersCredit[currentUser.username] = topupRes.credit;
+                        updateUserUI();
+                        
+                        document.getElementById('topupAmount').value = '';
+                        fileInput.value = '';
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'เติมเครดิตสำเร็จ!',
+                            text: `ระบบตรวจสอบสลิปและเติมเงิน ${amount} ฿ เรียบร้อยแล้ว`,
+                            timer: 2000,
+                            showConfirmButton: false
+                        }).then(() => {
+                            fetchDataFromSheet(false);
+                            switchTab('shop');
+                        });
+                    } else {
+                        Swal.fire('ตรวจสอบสลิปไม่ผ่าน', topupRes.message || 'กรุณาตรวจสอบรูปสลิปหรือยอดเงินใหม่อีกครั้ง', 'error');
+                    }
+                })
+                .catch(err => {
+                    Swal.fire('เกิดข้อผิดพลาด', err.toString(), 'error');
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function changeQty(productId, delta, maxStock) {
+            playCuteSound();
+            if (!productQuantities[productId]) {
+                productQuantities[productId] = 1;
+            }
+            productQuantities[productId] += delta;
+            if (productQuantities[productId] < 1) productQuantities[productId] = 1;
+            if (productQuantities[productId] > maxStock) productQuantities[productId] = maxStock;
+
+            const qtyInput = document.getElementById(`qty-input-${productId}`);
+            const totalPriceEl = document.getElementById(`total-price-${productId}`);
+            const product = products.find(p => p.id === productId);
+
+            if (qtyInput) qtyInput.value = productQuantities[productId];
+            if (totalPriceEl && product) {
+                totalPriceEl.innerText = (product.price * productQuantities[productId]).toLocaleString() + ' ฿';
+            }
+        }
+
+        function renderProducts() {
+            const grid = document.getElementById('productGrid');
+            document.getElementById('productCount').innerText = `มีทั้งหมด ${products.length} รายการ`;
+            grid.innerHTML = '';
+
+            products.forEach(p => {
+                const stockCount = p.codes ? p.codes.length : 0;
+                const isOutOfStock = stockCount === 0;
+
+                if (!productQuantities[p.id]) {
+                    productQuantities[p.id] = stockCount > 0 ? 1 : 0;
+                }
+                if (productQuantities[p.id] > stockCount) {
+                    productQuantities[p.id] = stockCount > 0 ? stockCount : 0;
+                }
+                const currentQty = productQuantities[p.id];
+                const totalPrice = p.price * currentQty;
+
+                grid.innerHTML += `
+                    <div class="shop-card overflow-hidden flex flex-col justify-between">
+                        <div>
+                            <div class="h-44 w-full overflow-hidden bg-purplePale relative">
+                                <img src="${p.img}" alt="${p.name}" class="w-full h-full object-cover cursor-pointer hover:scale-105 transition-all duration-300" onclick="openImageViewer('${p.img}')" onerror="this.src='https://placehold.co/400x300/EBE4F3/362D4A?text=Ranpraewshop'">
+                                <span class="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-xs px-2.5 py-1 rounded-full font-bold shadow-sm ${isOutOfStock ? 'text-rose-500' : 'text-emerald-600'}">
+                                    ${isOutOfStock ? 'สินค้าหมด' : `คงเหลือ ${stockCount} ชิ้น`}
+                                </span>
+                            </div>
+                            <div class="p-4">
+                                <h3 class="font-bold text-chocoText text-base mb-1 flex items-center"><i class="fa-solid fa-spa mr-1.5 text-purpleAccent"></i>${p.name}</h3>
+                                <p class="text-xs text-grayPurple mb-3 whitespace-pre-line">${p.desc || ''}</p>
+                                
+                                ${!isOutOfStock ? `
+                                <div class="flex items-center justify-between bg-purplePale/60 px-3 py-2 rounded-2xl border border-purplePaleDark mb-3">
+                                    <span class="text-xs font-semibold text-chocoText">จำนวน:</span>
+                                    <div class="flex items-center space-x-2">
+                                        <button onclick="changeQty('${p.id}', -1, ${stockCount})" class="w-7 h-7 bg-white text-chocoText rounded-xl shadow-xs font-bold flex items-center justify-center hover:bg-purplePale transition-all"><i class="fa-solid fa-minus text-[10px]"></i></button>
+                                        <input type="text" id="qty-input-${p.id}" value="${currentQty}" readonly class="w-8 text-center text-xs font-bold bg-transparent text-chocoText">
+                                        <button onclick="changeQty('${p.id}', 1, ${stockCount})" class="w-7 h-7 bg-white text-chocoText rounded-xl shadow-xs font-bold flex items-center justify-center hover:bg-purplePale transition-all"><i class="fa-solid fa-plus text-[10px]"></i></button>
+                                    </div>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                        <div class="p-4 pt-0 flex items-center justify-between mt-auto">
+                            <div>
+                                <span class="text-xs text-grayPurple block">ราคารวม</span>
+                                <span class="text-lg font-bold text-chocoText" id="total-price-${p.id}">${totalPrice.toLocaleString()} ฿</span>
+                            </div>
+                            <button onclick="playCuteSound(); buyProduct('${p.id}')" ${isOutOfStock ? 'disabled' : ''} 
+                                class="${isOutOfStock ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-gradient-to-r from-purpleAccent to-purpleDark hover:opacity-90 text-white shadow-sm'} text-xs font-bold px-4 py-2.5 rounded-2xl transition-all">
+                                <i class="fa-solid fa-cart-shopping mr-1"></i> ${isOutOfStock ? 'สินค้าหมด' : 'สั่งซื้อทันที'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function buyProduct(productId) {
+            if (!currentUser) { openAuthModal(); return; }
+
+            const product = products.find(p => p.id === productId);
+            const qtyToBuy = productQuantities[productId] || 1;
+
+            if (!product || !product.codes || product.codes.length === 0) {
+                Swal.fire('สินค้าหมดแล้ว!', 'สินค้านี้หมดสต๊อกชั่วคราว', 'warning');
+                return;
+            }
+
+            if (product.codes.length < qtyToBuy) {
+                Swal.fire('สินค้าในสต๊อกไม่พอ!', `สินค้าคงเหลือเพียง ${product.codes.length} ชิ้นเท่านั้น`, 'warning');
+                return;
+            }
+
+            const totalPrice = product.price * qtyToBuy;
+
+            if ((currentUser.credit || 0) < totalPrice) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'เครดิตไม่พอ!',
+                    text: `คุณมีเครดิต ${currentUser.credit || 0} บาท แต่ยอดรวม ${qtyToBuy} ชิ้น ราคา ${totalPrice} บาท กรุณาเติมเครดิตก่อนสั่งซื้อ`,
+                    confirmButtonText: 'ไปหน้าเติมเครดิต',
+                    confirmButtonColor: '#9B7EDD'
+                }).then(() => { switchTab('topup'); });
+                return;
+            }
+
+            Swal.fire({
+                title: 'ยืนยันสั่งซื้อสินค้า?',
+                text: `คุณกำลังจะสั่งซื้อ "${product.name}" จำนวน ${qtyToBuy} ชิ้น เป็นเงิน ${totalPrice} ฿`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'ยืนยันสั่งซื้อ',
+                cancelButtonText: 'ยกเลิก',
+                confirmButtonColor: '#9B7EDD'
+            }).then(result => {
+                if (result.isConfirmed) executePurchase(product, qtyToBuy, totalPrice);
+            });
+        }
+
+        function executePurchase(product, qtyToBuy, totalPrice) {
+            playCuteSound();
+            
+            // Ensure credit calculation is precise
+            const currentCredit = parseFloat(currentUser.credit || 0);
+            if (currentCredit < totalPrice) {
+                Swal.fire('เครดิตไม่พอ!', 'ยอดเงินคงเหลือของคุณไม่เพียงพอสำหรับการสั่งซื้อนี้', 'warning');
+                return;
+            }
+
+            currentUser.credit = Number((currentCredit - totalPrice).toFixed(2));
+            usersCredit[currentUser.username] = currentUser.credit;
+            updateUserUI();
+
+            let deliveredCodesArr = [];
+            for (let i = 0; i < qtyToBuy; i++) {
+                if (product.codes.length > 0) {
+                    deliveredCodesArr.push(product.codes.shift());
+                }
+            }
+            const combinedCodes = deliveredCodesArr.join('\n---\n');
+            const dateStr = new Date().toLocaleString('th-TH');
+            
+            const newOrder = {
+                orderId: 'RP-' + Math.floor(100000 + Math.random() * 900000),
+                username: currentUser.username,
+                productName: `${product.name} (จำนวน ${qtyToBuy} ชิ้น)`,
+                price: totalPrice,
+                code: combinedCodes,
+                date: dateStr
+            };
+
+            orders.unshift(newOrder);
+
+            const newSale = {
+                id: newOrder.orderId,
+                username: currentUser.username,
+                productName: `${product.name} (${qtyToBuy} ชิ้น)`,
+                price: totalPrice,
+                soldCode: combinedCodes,
+                date: dateStr,
+                status: 'สำเร็จ'
+            };
+
+            sales.unshift(newSale);
+            productQuantities[product.id] = 1;
+
+            renderProducts();
+            renderOrders();
+            renderAdminView();
+
+            const salePayload = {
+                order: newOrder,
+                sale: newSale,
+                products: products,
+                orders: orders,
+                users: usersCredit,
+                settings: shopSettings
+            };
+
+            fetch(APPS_SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ action: 'buy', data: JSON.stringify(salePayload) })
+            });
+
+            Swal.fire({
+                icon: 'success',
+                title: 'สั่งซื้อสำเร็จ!',
+                html: `<p class="text-xs text-grayPurple mb-2">รหัสสินค้าของคุณ (${qtyToBuy} ชุด):</p><div class="w-full max-h-48 overflow-y-auto bg-purplePale p-3 rounded-2xl border border-purplePaleDark font-mono text-xs text-chocoText text-left whitespace-pre-wrap select-all">${escapeHtml(combinedCodes)}</div>`,
+                confirmButtonText: 'ดูคำสั่งซื้อ',
+                confirmButtonColor: '#9B7EDD'
+            }).then(() => { switchTab('orders'); });
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        function renderOrders() {
+            const container = document.getElementById('ordersListContainer');
+            container.innerHTML = '';
+            const userOrders = currentUser ? orders.filter(o => o.username === currentUser.username) : [];
+            
+            if (userOrders.length === 0) {
+                container.innerHTML = `<div class="text-center py-8 text-grayPurple text-xs">ยังไม่มีประวัติการสั่งซื้อ</div>`;
+                return;
+            }
+
+            userOrders.forEach((o, index) => {
+                const uniqueCodeId = `order-code-${index}`;
+                container.innerHTML += `
+                    <div class="bg-purplePale/40 border border-purplePaleDark p-4 rounded-3xl space-y-3 shadow-xs">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-purplePale/80 pb-2 gap-1">
+                            <div>
+                                <span class="font-mono font-bold text-xs bg-purplePale px-2.5 py-1 rounded-xl text-chocoText">${o.orderId}</span>
+                                <span class="font-bold text-sm text-chocoText ml-2">${o.productName}</span>
+                            </div>
+                            <div class="text-xs text-grayPurple flex items-center space-x-3">
+                                <span class="font-bold text-chocoText text-sm">${o.price} ฿</span>
+                                <span><i class="fa-regular fa-clock mr-1"></i>${o.date}</span>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-chocoText mb-1"><i class="fa-solid fa-key text-purpleAccent mr-1"></i> รหัส/บัญชีที่ได้รับ:</p>
+                            <div class="relative bg-white border-2 border-purplePaleDark p-3 rounded-2xl">
+                                <div id="${uniqueCodeId}" class="font-mono text-xs text-chocoText whitespace-pre-wrap select-all overflow-x-auto max-h-48">${escapeHtml(o.code)}</div>
+                            </div>
+                        </div>
+                        <div class="flex justify-end pt-1">
+                            <button onclick="copyCustomTextByElement('${uniqueCodeId}', 'รหัสสินค้า')" class="bg-purpleAccent hover:opacity-90 text-white text-xs font-bold px-4 py-2 rounded-2xl shadow-sm transition-all flex items-center space-x-1.5">
+                                <i class="fa-solid fa-copy"></i>
+                                <span>คัดลอกรหัสทั้งหมด</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function copyCustomTextByElement(elementId, label) {
+            playCuteSound();
+            const text = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                Swal.fire({ icon: 'success', title: 'คัดลอกสำเร็จ!', text: `คัดลอก ${label} เรียบร้อยแล้ว`, timer: 1500, showConfirmButton: false });
+            });
+        }
+
+        function updateProductSelectDropdown() {
+            const select = document.getElementById('selectExistingProduct');
+            if (!select) return;
+            select.innerHTML = '<option value="">-- สร้างสินค้าใหม่ --</option>';
+            products.forEach(p => {
+                select.innerHTML += `<option value="${p.id}">${p.name} (คงเหลือ ${p.codes ? p.codes.length : 0} ชิ้น)</option>`;
+            });
+        }
+
+        function onSelectExistingProduct() {
+            const selectedId = document.getElementById('selectExistingProduct').value;
+            if (!selectedId) { resetProductForm(); return; }
+            const p = products.find(item => item.id === selectedId);
+            if (p) {
+                document.getElementById('pName').value = p.name;
+                document.getElementById('pPrice').value = p.price;
+                document.getElementById('pDesc').value = p.desc || '';
+                document.getElementById('pCodes').value = p.codes ? p.codes.join('\n---\n') : '';
+                document.getElementById('pImgUrl').value = p.img || '';
+            }
+        }
+
+        function resetProductForm() {
+            document.getElementById('selectExistingProduct').value = "";
+            document.getElementById('productForm').reset();
+        }
+
+        function parseCodesInput(rawText) {
+            if (!rawText) return [];
+            let blocks = rawText.split(/\n\s*---\s*\n|\n\s*---\s*$|\n\n+/);
+            let result = [];
+            for (let b of blocks) {
+                let trimmed = b.trim();
+                if (trimmed.length > 0) result.push(trimmed);
+            }
+            return result;
+        }
+
+        function handleAddProduct(e) {
+            e.preventDefault();
+            playCuteSound();
+            const selectedId = document.getElementById('selectExistingProduct').value;
+            const name = document.getElementById('pName').value.trim();
+            const price = parseFloat(document.getElementById('pPrice').value);
+            const desc = document.getElementById('pDesc').value.trim();
+            const rawCodes = document.getElementById('pCodes').value.trim();
+            let imgUrl = document.getElementById('pImgUrl').value.trim() || "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=500&auto=format&fit=crop&q=60";
+            
+            const newCodesArray = parseCodesInput(rawCodes);
+
+            if (selectedId) {
+                let p = products.find(item => item.id === selectedId);
+                if (p) {
+                    p.name = name; p.price = price; p.img = imgUrl; p.desc = desc;
+                    if (!p.codes) p.codes = [];
+                    p.codes = p.codes.concat(newCodesArray);
+                }
+            } else {
+                products.push({ id: 'p' + Date.now(), name: name, price: price, img: imgUrl, desc: desc, codes: newCodesArray });
+            }
+
+            resetProductForm();
+            renderProducts();
+            renderAdminView();
+            Swal.fire('สำเร็จ', `บันทึกสต๊อกสินค้าเรียบร้อย (เพิ่มเข้ามา ${newCodesArray.length} ชุด)`, 'success');
+        }
+
+        function renderAdminView() {
+            updateProductSelectDropdown();
+
+            let totalSalesAmount = 0;
+            sales.forEach(s => { totalSalesAmount += parseFloat(s.price || 0); });
+            let totalStockCount = 0;
+            products.forEach(p => { totalStockCount += (p.codes ? p.codes.length : 0); });
+
+            document.getElementById('adminTotalSalesAmount').innerText = totalSalesAmount.toLocaleString() + ' ฿';
+            document.getElementById('adminTotalSalesCount').innerText = sales.length + ' รายการ';
+            document.getElementById('adminTotalStockCount').innerText = totalStockCount + ' ชิ้น';
+
+            const tTbody = document.getElementById('adminTopupsTableBody');
+            tTbody.innerHTML = '';
+            if (topups.length === 0) {
+                tTbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-grayPurple">ยังไม่มีประวัติการเติมเงิน</td></tr>`;
+            } else {
+                topups.forEach(t => {
+                    tTbody.innerHTML += `
+                        <tr class="hover:bg-purplePale/40">
+                            <td class="p-2.5 font-mono">${t.topupId}</td>
+                            <td class="p-2.5 font-semibold text-chocoText">${t.username}</td>
+                            <td class="p-2.5 text-chocoText font-bold">+${t.amount} ฿</td>
+                            <td class="p-2.5">${t.slip || 'ไม่มีสลิป'}</td>
+                            <td class="p-2.5 text-[11px] text-grayPurple">${t.date}</td>
+                            <td class="p-2.5"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold text-[10px]">${t.status}</span></td>
+                        </tr>
+                    `;
+                });
+            }
+
+            const pTbody = document.getElementById('adminProductTableBody');
+            pTbody.innerHTML = '';
+            products.forEach(p => {
+                pTbody.innerHTML += `
+                    <tr>
+                        <td class="p-2.5"><img src="${p.img}" class="w-8 h-8 rounded-xl object-cover cursor-pointer" onclick="openImageViewer('${p.img}')"></td>
+                        <td class="p-2.5 font-bold text-chocoText">${p.name}</td>
+                        <td class="p-2.5 text-chocoText font-bold">${p.price} ฿</td>
+                        <td class="p-2.5"><span class="bg-purplePale text-chocoText px-2 py-0.5 rounded-full font-bold text-[11px]">${p.codes ? p.codes.length : 0} ชุด</span></td>
+                        <td class="p-2.5 space-x-2">
+                            <button onclick="playCuteSound(); editProductPrompt('${p.id}')" class="text-grayPurple font-bold text-xs"><i class="fa-solid fa-pen"></i> เติม</button>
+                            <button onclick="playCuteSound(); deleteProduct('${p.id}')" class="text-rose-400 font-bold text-xs"><i class="fa-solid fa-trash"></i> ลบ</button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            const sTbody = document.getElementById('adminSalesTableBody');
+            document.getElementById('adminTotalSalesBadge').innerText = `${sales.length} รายการ`;
+            sTbody.innerHTML = '';
+            if (sales.length === 0) {
+                sTbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-grayPurple text-xs">ยังไม่มีประวัติการขาย</td></tr>`;
+            } else {
+                sales.forEach((s, idx) => {
+                    const saleCodeId = `sale-code-${idx}`;
+                    sTbody.innerHTML += `
+                        <tr class="hover:bg-purplePale/40 transition-all align-top">
+                            <td class="p-2.5 font-mono font-bold text-xs text-purpleAccent">${s.id}</td>
+                            <td class="p-2.5 font-medium text-chocoText">${s.username}</td>
+                            <td class="p-2.5 font-medium text-chocoText">${s.productName}</td>
+                            <td class="p-2.5 text-chocoText font-bold">${s.price} ฿</td>
+                            <td class="p-2.5">
+                                <div class="bg-white p-2 rounded-xl border border-purplePaleDark font-mono text-xs max-w-xs whitespace-pre-wrap select-all max-h-32 overflow-y-auto mb-1" id="${saleCodeId}">${escapeHtml(s.soldCode)}</div>
+                                <button onclick="copyCustomTextByElement('${saleCodeId}', 'รหัสสินค้า')" class="bg-purpleAccent text-white font-bold text-[10px] px-2.5 py-1 rounded-xl shadow-xs"><i class="fa-solid fa-copy mr-1"></i>คัดลอก</button>
+                            </td>
+                            <td class="p-2.5 text-[11px] text-grayPurple">${s.date}</td>
+                        </tr>
+                    `;
+                });
+            }
+        }
+
+        function editProductPrompt(id) { document.getElementById('selectExistingProduct').value = id; onSelectExistingProduct(); }
+        function deleteProduct(id) { products = products.filter(p => p.id !== id); renderProducts(); renderAdminView(); }
+
+        function saveShopSettings() {
+            playCuteSound();
+            shopSettings.rules = document.getElementById('setRulesText').value;
+            shopSettings.rulesImgUrl = document.getElementById('rulesImgUrlInput').value.trim();
+            shopSettings.accImgUrl = document.getElementById('setAccImgUrl').value.trim();
+            shopSettings.accBank = document.getElementById('setAccBank').value.trim();
+            shopSettings.accName = document.getElementById('setAccName').value.trim();
+            shopSettings.accNumber = document.getElementById('setAccNumber').value.trim();
+            shopSettings.accWallet = document.getElementById('setAccWallet').value.trim();
+            shopSettings.noteSlip = document.getElementById('setNoteSlip').value.trim();
+
+            updateShopSettingsUI();
+            saveAllDataToSheet(true);
+        }
+
+        function updateShopSettingsUI() {
+            document.getElementById('shopRulesContent').innerText = shopSettings.rules;
+            document.getElementById('setRulesText').value = shopSettings.rules;
+            document.getElementById('rulesImgUrlInput').value = shopSettings.rulesImgUrl || '';
+
+            document.getElementById('setAccImgUrl').value = shopSettings.accImgUrl || '';
+            document.getElementById('setAccBank').value = shopSettings.accBank || '';
+            document.getElementById('setAccName').value = shopSettings.accName || '';
+            document.getElementById('setAccNumber').value = shopSettings.accNumber || '';
+            document.getElementById('setAccWallet').value = shopSettings.accWallet || '0989828417';
+            document.getElementById('setNoteSlip').value = shopSettings.noteSlip || 'ซื้อขายกับRanpraewshop';
+
+            document.getElementById('displayAccBank').innerText = shopSettings.accBank || '-';
+            document.getElementById('displayAccName').innerText = shopSettings.accName || '-';
+            document.getElementById('displayAccNumber').innerText = shopSettings.accNumber || '-';
+            document.getElementById('displayAccWallet').innerText = shopSettings.accWallet || '0989828417';
+            document.getElementById('displayNoteSlip').innerText = shopSettings.noteSlip || 'ซื้อขายกับRanpraewshop';
+
+            document.getElementById('topupBankInfo').innerText = (shopSettings.accBank || '-') + ' (' + (shopSettings.accName || '-') + ')';
+            document.getElementById('topupNumberInfo').innerText = shopSettings.accNumber || '-';
+            document.getElementById('topupWalletDisplay').innerText = shopSettings.accWallet || '0989828417';
+
+            const topupImg = document.getElementById('topupImgDisplay');
+            if (shopSettings.accImgUrl) { topupImg.src = shopSettings.accImgUrl; }
+
+            const rulesContainer = document.getElementById('rulesImgContainer');
+            const rulesImg = document.getElementById('rulesImgDisplay');
+            if (shopSettings.rulesImgUrl) { rulesImg.src = shopSettings.rulesImgUrl; rulesContainer.classList.remove('hidden'); }
+            else { rulesContainer.classList.add('hidden'); }
+
+            const accImg = document.getElementById('accImgDisplay');
+            if (shopSettings.accImgUrl) { accImg.src = shopSettings.accImgUrl; }
+        }
+
+        function saveAllDataToSheet(showAlert = true) {
+            if (showAlert) Swal.fire({ title: 'กำลังบันทึกข้อมูล...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+            const payload = { products: products, orders: orders, settings: shopSettings };
+
+            fetch(APPS_SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ action: 'save', data: JSON.stringify(payload) })
+            })
+            .then(res => res.json())
+            .then(response => {
+                if (showAlert) {
+                    if (response && response.status === 'success') {
+                        Swal.fire('สำเร็จ!', 'บันทึกข้อมูลลง Google Sheet เรียบร้อย', 'success');
+                    } else {
+                        Swal.fire('ข้อผิดพลาด', 'บันทึกไม่สำเร็จ', 'error');
+                    }
+                }
+            });
+        }
+
+        function fetchDataFromSheet(showNotify = false) {
+            if (showNotify) Swal.fire({ title: 'กำลังอัปเดตข้อมูล...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+
+            const callbackName = 'jsonpFetch_' + Math.round(100000 * Math.random());
+            window[callbackName] = function(response) {
+                delete window[callbackName];
+                if (document.body.contains(script)) document.body.removeChild(script);
+
+                if (response && response.status === 'success') {
+                    if (response.products) products = response.products;
+                    if (response.orders) orders = response.orders;
+                    if (response.settings) shopSettings = response.settings;
+                    if (response.topups) topups = response.topups;
+                    if (response.sales) sales = response.sales;
+                    if (response.users) {
+                        usersCredit = response.users;
+                        if (currentUser && usersCredit[currentUser.username] !== undefined) {
+                            currentUser.credit = usersCredit[currentUser.username];
+                            updateUserUI();
+                        }
+                    }
+
+                    renderProducts();
+                    renderOrders();
+                    renderAdminView();
+                    updateShopSettingsUI();
+
+                    if (showNotify) Swal.fire({ icon: 'success', title: 'อัปเดตข้อมูลล่าสุดเรียบร้อย!', timer: 1200, showConfirmButton: false });
+                }
+            };
+
+            const script = document.createElement('script');
+            script.src = `${APPS_SCRIPT_URL}?action=fetch&callback=${callbackName}`;
+            document.body.appendChild(script);
+        }
+    </script>
+</body>
+</html>
